@@ -5,87 +5,92 @@
 # znajdującym się w pliku /home/my_hashed_password.txt.
 # Należy skorzystać z modułu hashlib. Należy obsłużyć niezbędne wyjątki.
 
-import os 
+import os
 import hashlib
 
+
+def obsluga_wyjatkow(operacja):
+    try:
+        operacja()
+    except FileExistsError:
+        print("Plik o podanej nazwie już istnieje.")
+    except FileNotFoundError:
+        print("Nie znaleziono wskazanego pliku.")
+    except PermissionError:
+        print("Brak uprawnień do wykonania operacji.")
+    except Exception as e:
+        print(f"Wystąpił nieoczekiwany błąd: {e}")
+
+
+def zmien_nazwe_pliku():
+    aktualna_sciezka = input("Podaj aktualną ścieżkę do pliku: ")
+    nowa_sciezka = input("Podaj nową nazwę pliku lub ścieżkę: ")
+    os.rename(aktualna_sciezka, nowa_sciezka)
+    print("Nazwa pliku została zmieniona.")
+
+
+def skopiuj_plik():
+    sciezka_zrodlowa = input("Podaj ścieżkę do pliku źródłowego: ")
+    sciezka_docelowa = input("Podaj ścieżkę docelową dla pliku: ")
+    with open(sciezka_zrodlowa, "rb") as plik_zrodlo:
+        with open(sciezka_docelowa, "wb") as plik_cel:
+            while fragment := plik_zrodlo.read(4096):  # Operator walrus, odczyt fragmentów
+                plik_cel.write(fragment)
+    print("Plik został skopiowany.")
+
+
+def usun_plik():
+    sciezka_do_pliku = input("Podaj ścieżkę do pliku, który chcesz usunąć: ")
+    os.remove(sciezka_do_pliku)
+    print("Plik został usunięty.")
+
+
+def przenies_plik():
+    sciezka_zrodlowa = input("Podaj ścieżkę do pliku źródłowego: ")
+    sciezka_docelowa = input("Podaj nową ścieżkę docelową: ")
+    os.rename(sciezka_zrodlowa, sciezka_docelowa)
+    print("Plik został przeniesiony.")
+
+
+# Wczytanie zahashowanego hasła z pliku
 try:
-    with open("home/my_hashed_password.txt","r") as plik:
-        hash_hasla = plik.readline()
+    with open("home/my_hashed_password.txt", "r") as plik:
+        zahashowane_haslo = plik.readline().strip()
 except FileNotFoundError:
-    hash_hasla = input("nie istnieje plik z hashem, wprowadź hash samemu")
+    print("Nie znaleziono pliku z hasłem.")
+    exit(1)
+
+# Walidacja hasła użytkownika
 while True:
-    haslo = input("Podaj hasło")
-    sha256 = hashlib.sha256() #
-    sha256.update(haslo.encode()) #
-    hash = sha256.hexdigest()
-    if hash == hash_hasla:
-        print("hasło poprawne")
+    podane_haslo = input("Podaj hasło: ")
+    hash_md5 = hashlib.md5(podane_haslo.encode()).hexdigest()
+    if hash_md5 == zahashowane_haslo:
+        print("Hasło poprawne. Dostęp przyznany.")
         break
     else:
-        print("błędne hasło spróbuj jeszcze raz")     
-            
-def wyjatki(funkcja):
-    try:
-        funkcja() 
-    except FileExistsError:
-        print("istnieje juz plik o tej nazwie")
-    except FileNotFoundError:
-        print("podano nieistniejacy plik")
-    except PermissionError:
-        print("brak uprawnien do wykonania operacji")
-    except Exception as e:
-            print(f"Wystąpił nieoczekiwany błąd: {e}")
-        
-        
-def zmiana_nazwy():
-    stara_nazwa = input("podaj ścieżkę źródłową: ")
-    nowa_nazwa = input("podaj nowa nazwę pliku: ")
-    os.rename(stara_nazwa,nowa_nazwa)
-    print("nazwa została zmieniona")
-        
-def kopiowanie():
-    sciezka = input("podaj ścieżkę źródłową: ")
-    sciezka_doc = input("podaj ścieżke docelową: ")
-    with open(sciezka,"rb") as zrodlo:
-        with open(sciezka_doc,"wb") as nowy:
-            while chunk := zrodlo.read(4096): #walrus operator, odczytywanie w chunkach w celu unikniecia problemow z pamiecia
-                nowy.write(chunk)
-    print("plik skopiowano")
-    
-def usuwanie():
-    plik = input("podaj plik do usunięcia: ")
-    os.remove(plik)
-    print("plik usunięto")
-        
+        print("Błędne hasło. Spróbuj ponownie.")
 
-def przenoszenie():
-    sciezka = input("podaj ścieżkę źródłową: ")
-    sciezka_doc = input("podaj ścieżkę docelową: ")
-    os.rename(sciezka,sciezka_doc)
-    print("nazwa została zmieniona")
-        
+# Główna pętla programu
 while True:
-    print("\nWybierz operację:")
-    print("1. Zmień nazwę pliku")
-    print("2. Skopiuj plik")
-    print("3. Przenieś plik")
-    print("4. Usuń plik")
+    print("\nDostępne operacje:")
+    print("1. Kopiowanie pliku")
+    print("2. Przenoszenie pliku")
+    print("3. Zmiana nazwy pliku")
+    print("4. Usuwanie pliku")
     print("5. Wyjście")
 
-    print(os.listdir()) 
+    wybor = input("Wybierz operację (1-5): ")
 
-    choice = input("Wybierz opcję (1-5): ")
-
-    if choice == '1':
-        wyjatki(zmiana_nazwy)
-    elif choice == '2':
-        wyjatki(kopiowanie)
-    elif choice == '3':
-        wyjatki(przenoszenie)
-    elif choice == '4':
-        wyjatki(usuwanie)
-    elif choice == '5':
-        print("Zakończenie programu.")
+    if wybor == "1":
+        obsluga_wyjatkow(skopiuj_plik)
+    elif wybor == "2":
+        obsluga_wyjatkow(przenies_plik)
+    elif wybor == "3":
+        obsluga_wyjatkow(zmien_nazwe_pliku)
+    elif wybor == "4":
+        obsluga_wyjatkow(usun_plik)
+    elif wybor == "5":
+        print("Zamykanie programu")
         break
     else:
-        print("Nieprawidłowy wybór. Spróbuj ponownie.")
+        print("Nieprawidłowy wybór. Proszę spróbować ponownie.")
