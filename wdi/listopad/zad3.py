@@ -7,14 +7,14 @@ chat = [81, 14, 98, 17, 71, 16, 68, 22, 5, 92, 14, 74, 45, 48, 42, 99, 30, 84, 2
 16, 90, 7, 65, 40, 8, 1, 47, 44, 76, 59, 21, 61, 67, 78, 12, 80, 2, 86, 11]
 
 import random
-array = [random.randint(1,20) for j in range(100000)] # linijka z dupy do testowania nie przepisuj moze
+array = [random.randint(1,20) for j in range(100000)]
 
 def ciagi(tablica):
     roznice = []
     ile_a = 0
     ile_g = 0 
     iloczyny = []
-    for x in range(len(tablica)-1): # tworze tutaj dwie kolejne tablice 
+    for x in range(len(tablica)-1): 
         
         roznica = tablica[x] - tablica[x+1]
         roznice.append(roznica)
